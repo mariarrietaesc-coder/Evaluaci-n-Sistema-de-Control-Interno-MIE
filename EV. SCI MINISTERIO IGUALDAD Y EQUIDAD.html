@@ -1,0 +1,2916 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard MECI V2026 | 81 Requerimientos</title>
+    <!--
+        Esta versión del tablero incorpora mejoras de usabilidad y accesibilidad
+        sin alterar el contenido o la lógica de cálculo. Se aumentaron tamaños
+        de letra, se definió una paleta de colores con mayor contraste y se
+        rediseñó la tabla resumen para mostrar las columnas "Debilidades" y
+        "Fortalezas" en lugar de la distribución por puntos.  Los estilos
+        responsivos y los contenedores scroll facilitan la navegación sin
+        necesidad de reducir el zoom del navegador.
+    -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            /* Paleta institucional ajustada para mejor contraste */
+            --institucional: #a13e5c;
+            --bg: #F7F8FA;
+            --white: #ffffff;
+            --text: #2F2F2F;
+            /* Colores MECI mejorados para accesibilidad */
+            /* Ajuste de tonos de verdes para mayor diferenciación entre categorías */
+            /* Ajuste de verdes: un tono oscuro para "mantenimiento" y uno más claro para "oportunidad" */
+            --meci-mantenimiento: #2f6a4f;      /* Verde oscuro: mantenimiento */
+            --meci-oportunidad: #8bc34a;        /* Verde claro pero más diferenciado: oportunidad */
+            --meci-deficiencia: #f7c948;        /* Amarillo dorado */
+            --meci-mayor: #e74c3c;             /* Rojo accesible */
+            /* Gamas de grises para UI */
+            --gray-100: #f5f6f8;
+            --gray-200: #e6e8eb;
+            --gray-600: #666666;
+            --gray-800: #343a40;
+        }
+
+        /* Ajustes generales de tipografía y espaciado */
+        body {
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+            background-color: var(--bg);
+            margin: 0;
+            display: flex;
+            height: 100vh;
+            color: var(--text);
+            font-size: 0.95rem;        /* Base aumentada para legibilidad */
+            line-height: 1.5;
+            overflow: hidden;
+        }
+        
+        aside {
+            width: 300px;
+            background: var(--white);
+            border-right: 1px solid var(--gray-200);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.02);
+            overflow-y: auto;
+            flex-shrink: 0;
+        }
+        
+        .brand {
+            color: var(--institucional);
+            font-weight: 800;
+            font-size: 1.4rem;
+            margin-bottom: 25px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 2px solid var(--gray-200);
+            padding-bottom: 15px;
+        }
+        
+        .nav-label {
+            font-size: 0.75rem;
+            color: var(--gray-600);
+            font-weight: 700;
+            margin: 15px 0 8px 0;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .comp-btn {
+            padding: 12px 14px;
+            border-radius: 8px;
+            cursor: pointer;
+            margin-bottom: 4px;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border: 1px solid transparent;
+            background: none;
+            width: 100%;
+            color: var(--gray-600);
+            text-align: left;
+            font-size: 0.9rem;
+        }
+        
+        .comp-btn:hover {
+            background: rgba(161, 62, 92, 0.08);
+            color: var(--institucional);
+        }
+        
+        .comp-btn.active {
+            background: var(--institucional);
+            color: white;
+            box-shadow: 0 4px 12px rgba(161, 62, 92, 0.3);
+        }
+        
+        .sidebar-stats {
+            margin-top: auto;
+            padding: 20px;
+            background: rgba(161, 62, 92, 0.06);
+            border-radius: 12px;
+            border: 1px solid rgba(161, 62, 92, 0.3);
+            text-align: center;
+        }
+
+        main {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+        
+        .main-header {
+            background: var(--white);
+            border-bottom: 1px solid var(--gray-200);
+            padding: 20px 30px;
+            flex-shrink: 0;
+        }
+        
+        .top-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .page-title {
+            font-size: 1.6rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin: 0;
+        }
+
+        .page-title{
+             color: var(--institucional);
+             line-height: 1.2;
+        }
+
+.page-subtitle{
+  display: block;
+  margin-top: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: var(--gray-600); /* gris oscuro institucional */
+}
+
+
+        /* Título en fucsia institucional */
+        .page-title{
+            color: var(--institucional) !important;
+        }
+
+        .sem-btn.active{
+            background: var(--institucional) !important;
+            border-color: var(--institucional) !important;
+            color: #fff !important;
+        }
+        .sem-btn:hover{
+            border-color: var(--institucional) !important;
+            color: var(--institucional) !important;
+        }
+
+
+        .semester-selector {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .sem-btn {
+            padding: 8px 16px;
+            border: 1px solid var(--gray-200);
+            background: var(--white);
+            color: var(--gray-600);
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 0.85rem;
+            transition: all 0.2s;
+        }
+        
+        .sem-btn:hover {
+            border-color: var(--institucional);
+            color: var(--institucional);
+        }
+        
+        .sem-btn.active {
+            background: var(--institucional);
+            color: white;
+            border-color: var(--institucional);
+        }
+
+        /* Tabs */
+        .tabs-container {
+            display: flex;
+            gap: 4px;
+            border-bottom: 2px solid var(--gray-200);
+            margin: 0 -30px;
+            padding: 0 30px;
+        }
+        
+        .tab-btn {
+            padding: 12px 24px;
+            border: none;
+            background: none;
+            color: var(--gray-600);
+            font-weight: 600;
+            cursor: pointer;
+            position: relative;
+            transition: all 0.2s;
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab-btn:hover {
+            color: var(--institucional);
+        }
+        
+        .tab-btn.active {
+            color: var(--institucional);
+        }
+        
+        .tab-btn.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: var(--institucional);
+            border-radius: 3px 3px 0 0;
+        }
+
+        .tab-content {
+            display: none;
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px 30px;
+        }
+
+        .tab-content.active {
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        /* KPI Row */
+        .kpi-row {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+        }
+        
+        .kpi-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+            border-top: 4px solid var(--institucional);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .kpi-card::before {
+            content: attr(data-range);
+            position: absolute;
+            top: 8px;
+            right: 10px;
+            font-size: 0.7rem;
+            font-weight: 700;
+            color: rgba(0,0,0,0.25);
+            text-transform: uppercase;
+        }
+        
+        .kpi-card h3 {
+            margin: 0;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 700;
+            line-height: 1.2;
+            padding-right: 30px;
+        }
+        
+        .kpi-card p {
+            margin: 8px 0 0;
+            font-size: 1.7rem;
+            font-weight: 800;
+            color: var(--gray-800);
+        }
+
+        .kpi-card.mayor { border-top-color: var(--meci-mayor); }
+        .kpi-card.mayor p { color: var(--meci-mayor); }
+        
+        .kpi-card.deficiencia { border-top-color: var(--meci-deficiencia); }
+        .kpi-card.deficiencia p { color: #d4a700; }
+        
+        .kpi-card.oportunidad { border-top-color: var(--meci-oportunidad); }
+        .kpi-card.oportunidad p { color: #5a8f33; }
+        
+        .kpi-card.mantenimiento { border-top-color: var(--meci-mantenimiento); }
+        .kpi-card.mantenimiento p { color: var(--meci-mantenimiento); }
+
+        /* Charts */
+        .charts-container {
+            display: grid;
+            grid-template-columns: 2fr 1fr;
+            gap: 24px;
+        }
+        
+        .chart-card {
+            background: var(--white);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            height: 320px;
+            position: relative;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+        
+        .chart-title {
+            font-size: 1rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 15px;
+        }
+
+        /* Detail View - Cards Layout */
+        .detail-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .search-box {
+            position: relative;
+            width: 420px;
+        }
+
+        .search-box input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 1px solid var(--gray-200);
+            border-radius: 8px;
+            font-size: 0.95rem;
+            transition: all 0.2s;
+        }
+
+        .search-box input:focus {
+            outline: none;
+            border-color: var(--institucional);
+            box-shadow: 0 0 0 3px rgba(161, 62, 92, 0.15);
+        }
+
+        .search-box i {
+            position: absolute;
+            left: 14px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--gray-600);
+        }
+
+        .filter-badges {
+            display: flex;
+            gap: 8px;
+        }
+
+        .filter-badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            cursor: pointer;
+            border: 2px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .filter-badge.active {
+            border-color: var(--gray-800);
+        }
+
+        .filter-badge.all {
+            background: var(--gray-200);
+            color: var(--gray-800);
+        }
+        .filter-badge.mayor {
+            background: rgba(231, 76, 60, 0.1);
+            color: #c23b2b;
+        }
+        .filter-badge.deficiencia {
+            background: rgba(247, 201, 72, 0.2);
+            color: #a8850a;
+        }
+        .filter-badge.oportunidad {
+            background: rgba(112, 184, 111, 0.2);
+            color: #4f7c3e;
+        }
+        .filter-badge.mantenimiento {
+            background: rgba(56, 161, 105, 0.1);
+            color: var(--meci-mantenimiento);
+        }
+
+        .requirements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+            gap: 20px;
+            overflow-y: auto;
+            padding-right: 10px;
+        }
+
+        .req-card {
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            padding: 24px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+            /* Permitir que el contenedor crezca según su contenido */
+            overflow: visible;
+            font-size: 0.95rem;
+        }
+
+        .req-card:hover {
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            transform: translateY(-2px);
+            border-color: var(--institucional);
+        }
+
+        .req-card::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+        }
+
+        .req-card.mayor::before { background: var(--meci-mayor); }
+        .req-card.deficiencia::before { background: var(--meci-deficiencia); }
+        .req-card.oportunidad::before { background: var(--meci-oportunidad); }
+        .req-card.mantenimiento::before { background: var(--meci-mantenimiento); }
+
+        .req-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 14px;
+        }
+
+        .req-id {
+            background: rgba(161, 62, 92, 0.1);
+            color: var(--institucional);
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .req-percentage {
+            font-size: 1.6rem;
+            font-weight: 800;
+        }
+        
+        .req-card.mayor .req-percentage { color: var(--meci-mayor); }
+        .req-card.deficiencia .req-percentage { color: var(--meci-deficiencia); }
+        .req-card.oportunidad .req-percentage { color: #5a8f33; }
+        .req-card.mantenimiento .req-percentage { color: var(--meci-mantenimiento); }
+
+        .req-title {
+            /* Ajustes de título de tarjeta: tamaño y visibilidad mejorados */
+            font-weight: 600;
+            color: var(--gray-800);
+            font-size: 0.95rem;
+            line-height: 1.4;
+            margin-bottom: 8px;
+            /* Permitir múltiples líneas y evitar truncamiento del texto */
+            overflow: visible;
+            max-height: none;
+            white-space: normal;
+            word-break: break-word;
+        }
+
+        .req-meta {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            font-size: 0.85rem;
+            color: var(--gray-600);
+        }
+
+        .req-resp {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .req-status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 6px;
+            font-size: 0.8rem;
+            font-weight: 700;
+            width: fit-content;
+        }
+        
+        .req-status-badge i {
+            margin-right: 4px;
+            font-size: 0.7rem;
+        }
+
+        .trend-up { color: var(--meci-mantenimiento); }
+        .trend-down { color: var(--meci-mayor); }
+        .trend-neutral { color: var(--gray-600); }
+
+        /* Modal */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(4px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 40px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 16px;
+            width: 90%;
+            max-width: 900px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            animation: slideUp 0.3s ease;
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .modal-header {
+            padding: 24px 30px;
+            border-bottom: 1px solid var(--gray-200);
+            position: sticky;
+            top: 0;
+            background: white;
+            z-index: 10;
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 20px;
+            right: 24px;
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            color: var(--gray-600);
+            cursor: pointer;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            background: var(--gray-100);
+            color: var(--institucional);
+        }
+
+        .modal-title {
+            font-size: 1.2rem;
+            font-weight: 700;
+            color: var(--gray-800);
+            margin-bottom: 8px;
+            padding-right: 40px;
+        }
+
+        .modal-subtitle {
+            display: flex;
+            gap: 12px;
+            align-items: center;
+        }
+
+        .modal-id {
+            background: var(--institucional);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .modal-body {
+            padding: 30px;
+        }
+
+        .detail-section {
+            margin-bottom: 32px;
+        }
+
+        .detail-section:last-child {
+            margin-bottom: 0;
+        }
+
+        .detail-label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: var(--gray-600);
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .detail-value {
+            color: var(--gray-800);
+            line-height: 1.6;
+            font-size: 1rem;
+        }
+
+        .detail-value.resp {
+            font-weight: 600;
+        }
+
+        .detail-value.obs {
+            background: var(--gray-100);
+            padding: 16px;
+            border-radius: 8px;
+            border-left: 4px solid var(--institucional);
+            white-space: pre-wrap;
+        }
+
+        .history-chart {
+            height: 160px;
+            margin-top: 12px;
+        }
+
+        .comp-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 12px;
+            margin-top: 12px;
+        }
+
+        .comp-box {
+            background: var(--gray-100);
+            padding: 14px;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 2px solid transparent;
+        }
+
+        .comp-box:hover {
+            background: rgba(161, 62, 92, 0.07);
+            border-color: var(--institucional);
+        }
+
+        .comp-box.active {
+            background: var(--institucional);
+            color: white;
+        }
+
+        .comp-box .number {
+            font-size: 1.6rem;
+            font-weight: 800;
+            display: block;
+        }
+
+        .comp-box .label {
+            font-size: 0.75rem;
+            margin-top: 4px;
+            opacity: 0.8;
+        }
+
+        /* Table view */
+        .table-section {
+            background: var(--white);
+            border-radius: 12px;
+            border: 1px solid var(--gray-200);
+            overflow: hidden;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+        }
+
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        /* Permite hacer scroll vertical en la vista de lista sin reducir el zoom de la página */
+        #listContainer .table-wrapper {
+            max-height: 60vh;
+            overflow-y: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.9rem;
+        }
+        
+        th {
+            background: var(--gray-100);
+            padding: 12px 16px;
+            text-align: left;
+            color: var(--gray-600);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.5px;
+            border-bottom: 2px solid var(--gray-200);
+            white-space: nowrap;
+        }
+        
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--gray-200);
+            vertical-align: top;
+        }
+        
+        tr:hover td {
+            background: rgba(161, 62, 92, 0.05);
+        }
+
+        tr {
+            cursor: pointer;
+        }
+
+        .badge {
+            padding: 4px 8px;
+            border-radius: 6px;
+            font-weight: 700;
+            font-size: 0.75rem;
+            display: inline-block;
+            min-width: 100px;
+            text-align: center;
+            border: 1px solid transparent;
+        }
+        
+        .st-mayor {
+            background: rgba(231, 76, 60, 0.15);
+            color: #c23b2b;
+            border-color: rgba(231, 76, 60, 0.3);
+        }
+        .st-deficiencia {
+            background: rgba(247, 201, 72, 0.25);
+            color: #a8850a;
+            border-color: rgba(247, 201, 72, 0.4);
+        }
+        .st-oportunidad {
+            background: rgba(112, 184, 111, 0.2);
+            color: #4f7c3e;
+            border-color: rgba(112, 184, 111, 0.4);
+        }
+        .st-mantenimiento {
+            background: rgba(56, 161, 105, 0.15);
+            color: var(--meci-mantenimiento);
+            border-color: rgba(56, 161, 105, 0.35);
+        }
+
+        .compact-text {
+            max-width: 300px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            font-size: 0.8rem;
+            color: var(--gray-600);
+        }
+
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gray-200);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--gray-600);
+        }
+
+        .view-toggle {
+            display: flex;
+            gap: 8px;
+            background: var(--gray-100);
+            padding: 4px;
+            border-radius: 8px;
+        }
+
+        .view-toggle button {
+            padding: 6px 12px;
+            border: none;
+            background: transparent;
+            color: var(--gray-600);
+            font-weight: 600;
+            font-size: 0.8rem;
+            cursor: pointer;
+            border-radius: 6px;
+            transition: all 0.2s;
+        }
+
+        .view-toggle button.active {
+            background: white;
+            color: var(--institucional);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        /* Link clickeable para abrir fortalezas/debilidades del componente */
+        .component-link{
+            cursor: pointer;
+            font-weight: 700;
+            color: var(--institucional);
+        }
+        .component-link:hover{
+        text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+
+    <aside>
+        <div class="brand">
+            <i class=""></i> 
+        </div>
+
+        <div class="nav-label">Navegación por Componente</div>
+        
+        <div class="comp-grid" id="compGrid">
+            <div class="comp-box active" onclick="filterByComponent('all')">
+                <span class="number">81</span>
+                <span class="label">Total</span>
+            </div>
+            <div class="comp-box" onclick="filterByComponent('1')">
+                <span class="number">24</span>
+                <span class="label">Ambiente de Control</span>
+            </div>
+            <div class="comp-box" onclick="filterByComponent('2')">
+                <span class="number">17</span>
+                <span class="label">Evaluación de Riesgos</span>
+            </div>
+            <div class="comp-box" onclick="filterByComponent('3')">
+                <span class="number">12</span>
+                <span class="label">Actividades de Control</span>
+            </div>
+            <div class="comp-box" onclick="filterByComponent('4')">
+                <span class="number">14</span>
+                <span class="label">Información y Comunicación</span>
+            </div>
+            <div class="comp-box" onclick="filterByComponent('5')">
+                <span class="number">14</span>
+                <span class="label">Actividades de Monitoreo</span>
+            </div>
+        </div>
+
+        <div style="margin-top: 20px;">
+            <button class="comp-btn active" style="width:100%" onclick="filterByComponent('all')">
+                <i class="fas fa-globe"></i> Todos los Requerimientos
+            </button>
+            <button class="comp-btn" onclick="filterByComponent('1')">
+                <i class="fas fa-shield-alt"></i> 1. Ambiente de Control
+            </button>
+            <button class="comp-btn" onclick="filterByComponent('2')">
+                <i class="fas fa-exclamation-triangle"></i> 2. Evaluación de Riesgos
+            </button>
+            <button class="comp-btn" onclick="filterByComponent('3')">
+                <i class="fas fa-cogs"></i> 3. Actividades Control
+            </button>
+            <button class="comp-btn" onclick="filterByComponent('4')">
+                <i class="fas fa-comments"></i> 4. Información y Comunicación
+            </button>
+            <button class="comp-btn" onclick="filterByComponent('5')">
+                <i class="fas fa-chart-line"></i> 5. Monitoreo
+            </button>
+        </div>
+
+        <div class="sidebar-stats">
+            <p style="font-size: 0.7rem; color: var(--institucional); font-weight: 800; margin-bottom: 8px; text-transform: uppercase;">
+                PROMEDIO ACTUAL
+            </p>
+            <h2 id="side-avg" style="color: var(--institucional); margin: 0; font-size: 2.5rem;">--%</h2>
+            <p id="side-trend" style="font-size: 0.85rem; margin-top: 10px; font-weight: 600; color: var(--gray-800);">
+                Cargando...
+            </p>
+        </div>
+    </aside>
+
+    <main>
+        <div class="main-header">
+            <div class="top-bar">
+                <h1 class="page-title"> Evaluación Sistema de Control Interno<span 
+                    class="page-subtitle">Oficina de Control Interno - Ministerio de Igualdad y Equidad</span></h1>
+
+                <div class="semester-selector">
+                    <button class="sem-btn" data-sem="2024S1" onclick="setSemester('2024S1')">2024 S1</button>
+                    <button class="sem-btn" data-sem="2024S2" onclick="setSemester('2024S2')">2024 S2</button>
+                    <button class="sem-btn" data-sem="2025S1" onclick="setSemester('2025S1')">2025 S1</button>
+                    <button class="sem-btn active" data-sem="2025S2" onclick="setSemester('2025S2')">2025 S2</button>
+                </div>
+            </div>
+
+            <div class="tabs-container">
+                <button class="tab-btn active" onclick="switchTab('general')">
+                    <i class="fas fa-chart-pie"></i> Vista General
+                </button>
+                <button class="tab-btn" onclick="switchTab('detalle')">
+                    <i class="fas fa-list-ul"></i> Detalle por Requerimiento
+                </button>
+            </div>
+        </div>
+
+        <!-- TAB: GENERAL -->
+        <div id="tab-general" class="tab-content active">
+            <div class="kpi-row">
+                <div class="kpi-card promedio" data-range="">
+                    <h3>Cumplimiento Promedio</h3>
+                    <p id="kpi-avg">--%</p>
+                </div>
+                <div class="kpi-card mayor" data-range="0-25%">
+                    <h3>Deficiencia Mayor</h3>
+                    <p id="kpi-mayor">0</p>
+                </div>
+                <div class="kpi-card deficiencia" data-range="26-50%">
+                    <h3>Deficiencia Control</h3>
+                    <p id="kpi-deficiencia">0</p>
+                </div>
+                <div class="kpi-card oportunidad" data-range="51-75%">
+                    <h3>Oportunidad de Mejora</h3>
+                    <p id="kpi-oportunidad">0</p>
+                </div>
+                <div class="kpi-card mantenimiento" data-range="76-100%">
+                    <h3>Mantenimiento Control</h3>
+                    <p id="kpi-mantenimiento">0</p>
+                </div>
+            </div>
+
+            <div class="charts-container">
+                <!-- Se asigna un identificador al contenedor de la gráfica de barras para poder ocultarlo dinámicamente -->
+                <div id="barChartCard" class="chart-card">
+                    <div class="chart-title">Evolución Histórica por Semestre</div>
+                    <canvas id="barChart"></canvas>
+                </div>
+                <div class="chart-card">
+                    <div class="chart-title">Distribución del Estado Actual</div>
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="table-section">
+                <div class="table-wrapper">
+                    <table id="summaryTable">
+                        <thead>
+                            <tr>
+                                <th>Componente</th>
+                                <th>Requerimientos</th>
+                                <th>Promedio</th>
+                                <th>Debilidades</th>
+                                <th>Fortalezas</th>
+                                <th>Tendencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="summaryTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB: DETALLE -->
+        <div id="tab-detalle" class="tab-content">
+            <div class="detail-controls">
+                <!-- Se elimina el campo de búsqueda para simplificar la interfaz de detalle -->
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <div class="filter-badges">
+                        <span class="filter-badge all active" onclick="filterByStatus('all')">Todos</span>
+                        <span class="filter-badge mayor" onclick="filterByStatus('mayor')">Mayor</span>
+                        <span class="filter-badge deficiencia" onclick="filterByStatus('deficiencia')">Deficiencia</span>
+                        <span class="filter-badge oportunidad" onclick="filterByStatus('oportunidad')">Oportunidad</span>
+                        <span class="filter-badge mantenimiento" onclick="filterByStatus('mantenimiento')">Mantenimiento</span>
+                    </div>
+
+                    <div class="view-toggle">
+                        <button class="active" onclick="toggleView('cards')" title="Vista de Tarjetas"><i class="fas fa-th-large"></i></button>
+                        <button onclick="toggleView('list')" title="Vista de Lista"><i class="fas fa-list"></i></button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="cardsContainer" class="requirements-grid">
+                <!-- Cards generated by JS -->
+            </div>
+
+            <div id="listContainer" class="table-section" style="display: none;">
+                <div class="table-wrapper">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>Requerimiento</th>
+                                <th>Conclusiones</th>
+                                <th>Estado</th>
+                                <th>%</th>
+                                <th>Tendencia</th>
+                            </tr>
+                        </thead>
+                        <tbody id="listTableBody">
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL -->
+    <div class="modal-overlay" id="detailModal" onclick="closeModal(event)">
+        <div class="modal-content" onclick="event.stopPropagation()">
+            <button class="modal-close" onclick="closeModal()"><i class="fas fa-times"></i></button>
+            
+            <div class="modal-header">
+                <div class="modal-title" id="modalTitle">Título del Requerimiento</div>
+                <div class="modal-subtitle">
+                    <span class="modal-id" id="modalId">ID</span>
+                    <span id="modalStatus" class="badge">Estado</span>
+                </div>
+            </div>
+            
+            <div class="modal-body">
+                <div class="detail-section">
+                    <div class="detail-label">Responsable Principal</div>
+                    <div class="detail-value resp" id="modalResp">-</div>
+                </div>
+                
+                <div class="detail-section" id="modalCoSection">
+                    <div class="detail-label">Co-responsables</div>
+                    <div class="detail-value" id="modalCo">-</div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-label">Historial de Cumplimiento</div>
+                    <div class="history-chart">
+                        <canvas id="modalChart"></canvas>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <div class="detail-label">Observaciones y Hallazgos</div>
+                    <div class="detail-value obs" id="modalObs">-</div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- MODAL INSIGHTS (FORTALEZAS / DEBILIDADES POR COMPONENTE) -->
+<div class="modal-overlay" id="insightModal" onclick="closeInsightModal(event)">
+  <div class="modal-content" onclick="event.stopPropagation()">
+    <button class="modal-close" onclick="closeInsightModal()"><i class="fas fa-times"></i></button>
+
+    <div class="modal-header">
+      <div class="modal-title" id="insightTitle">Componente</div>
+      <div class="modal-subtitle">
+        <span class="modal-id" id="insightSem">Semestre</span>
+      </div>
+    </div>
+
+    <div class="modal-body">
+      <div class="detail-section">
+        <div class="detail-label">Fortalezas</div>
+        <div class="detail-value obs" id="insightFort">—</div>
+      </div>
+
+      <div class="detail-section">
+        <div class="detail-label">Debilidades</div>
+        <div class="detail-value obs" id="insightDeb">—</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+    <script>
+        // ==========================================
+        // DATOS
+        // ==========================================
+        // Se mantienen los datos originales. Cada objeto contiene valores
+        // semestrales y observaciones sin modificación de contenido.
+
+const comp1 = [
+  {
+    id: "1.1",
+    comp: "1",
+    req: "Aplicación del Código de Integridad. (incluye análisis de desviaciones, convivencia laboral, temas disciplinarios internos, quejas o denuncias sobre los servidores de la entidad, u otros temas relacionados)",
+    resp: "Subdirección de Talento Humano",
+    co: "Oficina de Control Interno Disciplinario",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 100,
+    obs: "Se evidenció el despliegue de la Política de Integridad a través de actividades de divulgación, socialización y apropiación dirigidas a los servidores y contratistas de la Entidad. Para su mantenimiento, se requiere continuar fortaleciendo las estrategias de apropiación y dar cumplimiento a los lineamientos en materia de convivencia laboral, en el marco del Esquema de Líneas de Defensa."
+  },
+  {
+    id: "1.2",
+    comp: "1",
+    req: "Mecanismos para el manejo de conflictos de interés",
+    resp: "Subdirección de Talento Humano",
+    co: "Oficina de Control Interno Disciplinario",
+    s24s1: 0,
+    s24s2: 0,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Entidad formalizó y socializó, durante la vigencia 2025, los instrumentos técnicos, normativos y procedimentales para la gestión de conflictos de interés y la prevención de actos de corrupción, consolidando mecanismos institucionales para su identificación, atención y seguimiento."
+  },
+  {
+    id: "1.3",
+    comp: "1",
+    req: "Mecanismos frente a la detección y prevención del uso inadecuado de información privilegiada",
+    resp: "Oficina Asesora de Planeación",
+    co: "Subdirección de Talento Humano / Oficina de Saberes y Conocimientos Estratégicos",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 75,
+    obs: "Se evidenció la existencia de actividades orientadas a la detección y prevención del uso inadecuado de información privilegiada; no obstante, estas se encuentran en proceso de diseño y requieren su formalización para fortalecer su aplicación institucional."
+  },
+  {
+    id: "1.4",
+    comp: "1",
+    req: "Evaluación de las acciones transversales de integridad en la entidad",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 100,
+    obs: "Durante la vigencia 2025 se evidenció la inclusión de controles orientados a la incorporación de los valores institucionales en los procesos de capacitación e inducción, contribuyendo al fortalecimiento del componente de integridad."
+  },
+  {
+    id: "1.5",
+    comp: "1",
+    req: "Análisis sobre la viabilidad para el establecimiento de una línea interna de denuncia",
+    resp: "Oficina Asesora de Planeación",
+    co: "Subdirección de Talento Humano / Oficina de Control Interno Disciplinario",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció la existencia de instrumentos relacionados con la atención de situaciones irregulares; sin embargo, no se identificó una periodicidad definida para su revisión y fortalecimiento continuo."
+  },
+  {
+    id: "2.1",
+    comp: "1",
+    req: "Creación o actualización del Comité Institucional de Coordinación de Control Interno (CICCI)",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 100,
+    s24s2: 100,
+    s25s1: 100,
+    s25s2: 100,
+    obs: "Se evidenció la creación y formalización del Comité Institucional de Coordinación de Control Interno mediante Resolución No. 0829 de 2024, consolidando una instancia para la coordinación y seguimiento del Sistema de Control Interno."
+  },
+  {
+    id: "2.2",
+    comp: "1",
+    req: "Definición y documentación del Esquema de Líneas de Defensa",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "La Entidad cuenta con el Manual GE_A-MN-003 que documenta el Esquema de Líneas de Defensa; no obstante, se identificaron oportunidades de mejora relacionadas con su apropiación y funcionamiento efectivo."
+  },
+  {
+    id: "2.3",
+    comp: "1",
+    req: "Definición de líneas de reporte para temas clave",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que el Esquema de Líneas de Defensa se encuentra formalizado y divulgado; sin embargo, se requiere fortalecer las estrategias que aseguren su apropiación por parte de las dependencias."
+  },
+  {
+    id: "3.1",
+    comp: "1",
+    req: "Definición y evaluación de la Política de Administración del Riesgo",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 75,
+    obs: "La Entidad cuenta con la Política de Administración del Riesgo (GE_A-PO-001); no obstante, se identificó la necesidad de su actualización para mantener su alineación con el contexto institucional."
+  },
+  {
+    id: "3.2",
+    comp: "1",
+    req: "Definición de niveles de aceptación del riesgo por la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Alta Dirección ha definido niveles de aceptación del riesgo coherentes con los objetivos institucionales, constituyéndose en un referente para la toma de decisiones."
+  },
+  {
+    id: "3.3",
+    comp: "1",
+    req: "Evaluación de la planeación estratégica y establecimiento de acciones de mejora",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "La Entidad cuenta con procedimientos formalizados para la planeación estratégica; sin embargo, se identificaron oportunidades de mejora relacionadas con su seguimiento y articulación."
+  },
+  {
+    id: "4.1",
+    comp: "1",
+    req: "Evaluación de la Planeación Estratégica de Talento Humano",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que los planes estratégicos de Talento Humano se encuentran publicados en la sección de Transparencia de la Entidad."
+  },
+  {
+    id: "4.2",
+    comp: "1",
+    req: "Evaluación de las actividades relacionadas con el ingreso del personal",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 50,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "La Entidad cuenta con instrumentos institucionales que regulan el ingreso del personal, evidenciándose su aplicación."
+  },
+  {
+    id: "4.3",
+    comp: "1",
+    req: "Evaluación de las actividades relacionadas con la permanencia del personal",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 25,
+    s25s2: 100,
+    obs: "Se evidenció la expedición de resoluciones mediante las cuales se adoptaron medidas relacionadas con modalidades de trabajo, contribuyendo a la permanencia del personal."
+  },
+  {
+    id: "4.4",
+    comp: "1",
+    req: "Políticas sobre la responsabilidad de los servidores públicos frente al Control Interno",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció la existencia de instrumentos implementados; no obstante, se identificó la necesidad de fortalecer su articulación con los procesos de planeación institucional."
+  },
+  {
+    id: "4.5",
+    comp: "1",
+    req: "Evaluación de las actividades relacionadas con el retiro del personal",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 75,
+    obs: "Se evidenció la existencia de una Guía de Desvinculación; sin embargo, esta no se encuentra formalizada ni registrada en el Sistema de Gestión correspondiente."
+  },
+  {
+    id: "4.6",
+    comp: "1",
+    req: "Evaluación del impacto del Plan Institucional de Capacitación",
+    resp: "Subdirección de Talento Humano",
+    co: "",
+    s24s1: 50,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "El Plan Institucional de Capacitación 2025 se encuentra formalizado y presenta un avance del 85%, evidenciándose su contribución al fortalecimiento de capacidades."
+  },
+  {
+    id: "4.7",
+    comp: "1",
+    req: "Evaluación de los productos y servicios entregados por los contratistas",
+    resp: "Subdirección de Contratación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que el Manual de Supervisión CT_U-MN-001 se encuentra formalizado y divulgado."
+  },
+  {
+    id: "5.1",
+    comp: "1",
+    req: "Estándares de reporte conforme al Esquema de Líneas de Defensa",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "El Manual GE_A-MN-003 documenta los estándares de reporte; no obstante, se requiere fortalecer su apropiación por parte de las dependencias."
+  },
+  {
+    id: "5.2",
+    comp: "1",
+    req: "Análisis de reportes financieros por la Alta Dirección",
+    resp: "Oficina Administrativa y Financiera",
+    co: "Oficina Asesora de Planeación",
+    s24s1: 0,
+    s24s2: 75,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que el procedimiento FI_C-PR-002 se encuentra formalizado; no obstante, se identificaron oportunidades de fortalecimiento en los controles presupuestales."
+  },
+  {
+    id: "5.3",
+    comp: "1",
+    req: "Toma de decisiones con base en información de segunda y tercera línea de defensa",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se identificó la necesidad de fortalecer la toma de decisiones con base en información generada por la segunda y tercera línea de defensa."
+  },
+  {
+    id: "5.4",
+    comp: "1",
+    req: "Evaluación de la estructura de control frente a cambios institucionales",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "El Manual GE_A-MN-004 se encuentra formalizado; sin embargo, se requiere fortalecer su aplicación sistemática frente a los cambios institucionales."
+  },
+  {
+    id: "5.5",
+    comp: "1",
+    req: "Aprobación y seguimiento al Plan Anual de Auditoría",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 50,
+    s24s2: 100,
+    s25s1: 25,
+    s25s2: 50,
+    obs: "El Plan Anual de Auditoría fue presentado y aprobado en el CICCI; no obstante, se identificó la necesidad de cumplir con la frecuencia de sesiones establecida."
+  },
+  {
+    id: "5.6",
+    comp: "1",
+    req: "Análisis de los informes de Control Interno y evaluación de su impacto",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 25,
+    s25s2: 50,
+    obs: "Se evidenció la existencia de instrumentos formalizados; sin embargo, las acciones orientadas a la evaluación del impacto de los informes se encuentran pendientes de fortalecimiento."
+  }
+];
+
+const comp2 = [
+  {
+    id: "6.1",
+    comp: "2",
+    req: "Mecanismos para vincular el plan estratégico con los objetivos operativos",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Saberes y Conocimientos Estratégicos / Oficina de Proyectos para la Igualdad y Equidad",
+    s24s1: 25,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos de planeación institucional; no obstante, se identifican oportunidades de fortalecimiento en los mecanismos que permitan una articulación más consistente entre el plan estratégico y los objetivos operativos."
+  },
+  {
+    id: "6.2",
+    comp: "2",
+    req: "Definición de objetivos tipo SMART para procesos, programas y proyectos",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Saberes y Conocimientos Estratégicos / Oficina de Proyectos para la Igualdad y Equidad",
+    s24s1: 25,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con la formulación de 24 programas; sin embargo, se identifican aspectos por fortalecer en la definición y aplicación sistemática de objetivos que cumplan con los criterios SMART."
+  },
+  {
+    id: "6.3",
+    comp: "2",
+    req: "Evaluación periódica de los objetivos por parte de la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Saberes y Conocimientos Estratégicos / Oficina de Proyectos para la Igualdad y Equidad",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos documentados que orientan el seguimiento a los objetivos institucionales; no obstante, se identifican oportunidades de mejora en la consolidación y sistematicidad de dicho seguimiento por parte de la Alta Dirección."
+  },
+  {
+    id: "7.1",
+    comp: "2",
+    req: "Alcance de la política de administración del riesgo para toda la entidad",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "La Entidad cuenta con instrumentos documentados para la administración del riesgo; no obstante, se identificó que la matriz de riesgos no incorpora riesgos asociados a la operación de instancias territoriales."
+  },
+  {
+    id: "7.2",
+    comp: "2",
+    req: "Consolidación de información clave para la gestión del riesgo",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 50,
+    obs: "Se evidenció la publicación de informes y documentos asociados a la gestión del riesgo; sin embargo, se identificaron inconsistencias entre la información reportada en diferentes instrumentos institucionales."
+  },
+  {
+    id: "7.3",
+    comp: "2",
+    req: "Análisis de resultados de la segunda línea de defensa por la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "Despacho",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos asociados al seguimiento de la gestión del riesgo; no obstante, se recomienda fortalecer la articulación y consolidación de la información presentada a la Alta Dirección."
+  },
+  {
+    id: "7.4",
+    comp: "2",
+    req: "Definición de cursos de acción frente a la materialización de riesgos",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "La Entidad cuenta con instrumentos para la administración del riesgo; sin embargo, se identificaron debilidades en la trazabilidad entre los reportes de seguimiento y las acciones definidas frente a riesgos materializados."
+  },
+  {
+    id: "7.5",
+    comp: "2",
+    req: "Seguimiento a las acciones orientadas a resolver materializaciones de riesgo",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció la realización de seguimiento a los riesgos materializados durante la vigencia 2024, conforme a la información reportada por la Entidad."
+  },
+  {
+    id: "8.1",
+    comp: "2",
+    req: "Definición de procesos susceptibles a actos de corrupción",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Saberes y Conocimientos Estratégicos / Oficina de Proyectos para la Igualdad y Equidad",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con un Plan de Mejoramiento abierto; no obstante, se identificó como aspecto por fortalecer la actualización y consistencia de la matriz de riesgos de corrupción."
+  },
+  {
+    id: "8.2",
+    comp: "2",
+    req: "Monitoreo de los riesgos de corrupción por parte de la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 50,
+    obs: "La Política de Administración del Riesgo GE_A-PO-001 fue aprobada en diciembre de 2024; sin embargo, se evidenció que no se encuentra actualizada conforme al contexto institucional."
+  },
+  {
+    id: "8.3",
+    comp: "2",
+    req: "División de funciones para reducir el riesgo de fraudes",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "El Manual GE_A-MN-003 se encuentra formalizado; no obstante, evaluaciones de aseguramiento han identificado oportunidades de mejora en la efectiva segregación de funciones."
+  },
+  {
+    id: "8.4",
+    comp: "2",
+    req: "Evaluación de fallas en los controles para definir cursos de acción",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el procedimiento GE_A-PR-004 formalizado; sin embargo, no se observaron comunicaciones asociadas a este análisis en el Comité Institucional de Gestión y Desempeño (CIGD)."
+  },
+  {
+    id: "9.1",
+    comp: "2",
+    req: "Monitoreo de factores internos y externos que afectan el riesgo",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 75,
+    obs: "La Entidad cuenta con política e instrumentos para la administración del riesgo; no obstante, se identificó que la política no se encuentra actualizada."
+  },
+  {
+    id: "9.2",
+    comp: "2",
+    req: "Análisis de riesgos asociados a actividades tercerizadas y regionales",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 100,
+    s25s2: 50,
+    obs: "Se evidenció que la matriz de riesgos institucional no identifica riesgos asociados a la operación de las Territoriales de la Entidad."
+  },
+  {
+    id: "9.3",
+    comp: "2",
+    req: "Monitoreo de riesgos aceptados por la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 50,
+    obs: "Se evidenció que, si bien se presentan riesgos ante instancias institucionales, no se cuenta con una trazabilidad suficiente que permita identificar su seguimiento y tratamiento."
+  },
+  {
+    id: "9.4",
+    comp: "2",
+    req: "Evaluación de fallas en controles con base en informes de segunda y tercera línea de defensa",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 100,
+    obs: "Conforme a la información reportada por la Entidad, no se registraron materializaciones de riesgos durante la vigencia 2025."
+  },
+  {
+    id: "9.5",
+    comp: "2",
+    req: "Análisis del impacto de cambios en los niveles organizacionales sobre el Sistema de Control Interno",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que se presentan riesgos ante el Comité Institucional de Gestión y Desempeño (CIGD); no obstante, no se identificó un análisis específico del impacto de los cambios organizacionales sobre el Sistema de Control Interno."
+  }
+];
+
+const comp3 = [
+  {
+    id: "10.1",
+    comp: "3",
+    req: "División de funciones segregadas para reducir el riesgo de error",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Manual de Líneas de Defensa (GE_A-MN-003); no obstante, se han presentado materializaciones de riesgo asociadas a la segregación de funciones, lo que evidencia oportunidades de fortalecimiento en su aplicación efectiva."
+  },
+  {
+    id: "10.2",
+    comp: "3",
+    req: "Identificación de situaciones en las que no exista segregación de funciones",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos documentados para orientar la segregación de funciones; sin embargo, persisten aspectos por fortalecer a nivel estratégico para asegurar su identificación, tratamiento y seguimiento."
+  },
+  {
+    id: "10.3",
+    comp: "3",
+    req: "Integración de sistemas de gestión (ISO u otros) a la estructura de control",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 75,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Manual del Sistema Integrado de Gestión; no obstante, se identifican aspectos por fortalecer en la implementación y madurez de los sistemas ISO, en coherencia con la estructura de control."
+  },
+  {
+    id: "11.1",
+    comp: "3",
+    req: "Actividades de control sobre infraestructuras de TI",
+    resp: "Oficina de Tecnologías de la Información",
+    co: "Oficina Asesora de Planeación",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos documentados para la gestión de incidentes y la atención de eventos asociados a TI; no obstante, persisten oportunidades de fortalecimiento en su implementación y seguimiento."
+  },
+  {
+    id: "11.2",
+    comp: "3",
+    req: "Actividades de control sobre proveedores de TI",
+    resp: "Oficina de Tecnologías de la Información",
+    co: "",
+    s24s1: 75,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que el Procedimiento de Gestión de Servicios de TI se encuentra en estado de borrador, sin formalización, lo cual limita la estandarización de actividades de control asociadas a proveedores de TI."
+  },
+  {
+    id: "11.3",
+    comp: "3",
+    req: "Matrices de roles y usuarios con segregación de funciones",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 25,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Manual de Líneas de Defensa; no obstante, se identificaron aspectos por fortalecer en la definición, formalización y aplicación de matrices de roles y usuarios que aseguren la segregación de funciones."
+  },
+  {
+    id: "11.4",
+    comp: "3",
+    req: "Información de la tercera línea frente a la evaluación independiente sobre proveedores",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que el Procedimiento de Trabajos de Aseguramiento se encuentra formalizado y que se realizan evaluaciones independientes, lo cual contribuye a la verificación objetiva de aspectos asociados a proveedores, cuando aplica."
+  },
+  {
+    id: "12.1",
+    comp: "3",
+    req: "Evaluación sobre actualización de procesos, procedimientos y políticas",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la tercera línea realiza evaluaciones sobre procesos y procedimientos; no obstante, se identifican oportunidades de fortalecimiento en la realización de evaluaciones claras desde la segunda línea, de forma que se consolide un ciclo integral de mejora."
+  },
+  {
+    id: "12.2",
+    comp: "3",
+    req: "Evaluación del diseño de controles frente a la gestión del riesgo",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que el Procedimiento de Trabajos de Aseguramiento se aplica de manera consistente, aportando elementos para la evaluación del diseño de controles frente a la gestión del riesgo."
+  },
+  {
+    id: "12.3",
+    comp: "3",
+    req: "Monitoreo a riesgos conforme a la política establecida",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 100,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados para el monitoreo del riesgo; no obstante, la Política de Administración del Riesgo se encuentra pendiente de actualización, lo cual limita su alineación con el contexto institucional vigente."
+  },
+  {
+    id: "12.4",
+    comp: "3",
+    req: "Verificación de que los responsables ejecutan los controles conforme a su diseño",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 100,
+    s25s1: 100,
+    s25s2: 100,
+    obs: "Se evidenció que el Procedimiento de Trabajos de Aseguramiento se aplica de manera consistente, permitiendo verificar la ejecución de controles conforme a su diseño, cuando resulta aplicable en el alcance de las evaluaciones."
+  },
+  {
+    id: "12.5",
+    comp: "3",
+    req: "Evaluación de la adecuación de controles a las especificidades del proceso",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Control Interno",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que el Procedimiento de Trabajos de Aseguramiento incorpora un enfoque sistemático y basado en riesgos, lo cual contribuye a evaluar la adecuación de los controles frente a las especificidades de los procesos evaluados."
+  }
+];
+
+
+ const comp4 = [
+  {
+    id: "13.1",
+    comp: "4",
+    req: "Diseño de sistemas de información para capturar y procesar datos",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "Oficina de Tecnologías de la Información",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con la Política de Gestión Estadística Institucional; no obstante, los documentos técnicos asociados se encuentran en estado de borrador, lo cual limita su adopción formal y trazabilidad institucional."
+  },
+  {
+    id: "13.2",
+    comp: "4",
+    req: "Inventario de información relevante con mecanismo de actualización",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "Oficina de Tecnologías de la Información",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; sin embargo, frente al Registro de Igualdad y Equidad (RIE), los documentos se encuentran en estado de borrador, lo que requiere avanzar en su formalización para asegurar su actualización y gestión consistente."
+  },
+  {
+    id: "13.3",
+    comp: "4",
+    req: "Fuentes de datos internas y externas amplias",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "Oficina de Relacionamiento con la Ciudadanía",
+    s24s1: 50,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados para el manejo de fuentes de datos internas y externas; no obstante, se identificaron diferencias en la definición de responsables, lo cual puede afectar la claridad de roles y la trazabilidad del proceso."
+  },
+  {
+    id: "13.4",
+    comp: "4",
+    req: "Actividades de control sobre integridad, confidencialidad y disponibilidad de la información",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; no obstante, se mantiene como aspecto por fortalecer la definición y aplicación de la clasificación de la información, en coherencia con los atributos de integridad, confidencialidad y disponibilidad."
+  },
+  {
+    id: "14.1",
+    comp: "4",
+    req: "Mecanismos para que la Alta Dirección comunique objetivos y metas",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con mecanismos y canales para la comunicación de objetivos y metas; no obstante, se identifican oportunidades de fortalecimiento en la efectividad del despliegue institucional y su apropiación."
+  },
+  {
+    id: "14.2",
+    comp: "4",
+    req: "Políticas de operación para la administración de la información",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "Oficina de Tecnologías de la Información",
+    s24s1: 0,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con la Política de Gestión Estadística; sin embargo, se identificaron vacíos en la definición verificable de niveles de autoridad, lo cual limita la claridad sobre responsabilidades y aprobaciones en la administración de la información."
+  },
+  {
+    id: "14.3",
+    comp: "4",
+    req: "Canales de denuncia anónima o confidencial y mecanismos para su manejo",
+    resp: "Oficina de Tecnologías de la Información",
+    co: "Oficina de Saberes y Conocimientos Estratégicos",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados asociados a canales de denuncia; no obstante, se mantiene la necesidad de definir una periodicidad de revisión que asegure su mejora continua y funcionamiento consistente."
+  },
+  {
+    id: "14.4",
+    comp: "4",
+    req: "Políticas y procedimientos para una comunicación interna efectiva",
+    resp: "Oficina de Saberes y Conocimientos Estratégicos",
+    co: "Subdirección de Talento Humano",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; no obstante, se identifican aspectos por fortalecer en la formalización del procedimiento de publicación, a fin de consolidar una comunicación interna consistente y verificable."
+  },
+  {
+    id: "15.1",
+    comp: "4",
+    req: "Controles para la comunicación externa, incluyendo contratistas",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Relacionamiento con la Ciudadanía",
+    s24s1: 50,
+    s24s2: 75,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados para la comunicación externa; no obstante, se recomienda fortalecer la definición verificable de controles (responsable, periodicidad y evidencia), incluyendo aquellos aplicables a contratistas."
+  },
+  {
+    id: "15.2",
+    comp: "4",
+    req: "Canales externos definidos y reconocidos por la organización",
+    resp: "Oficina de Relacionamiento con la Ciudadanía",
+    co: "Oficina de Tecnologías de la Información",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 0,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; no obstante, se identificó la necesidad de fortalecer el despliegue institucional para asegurar el reconocimiento y uso consistente de los canales externos definidos."
+  },
+  {
+    id: "15.3",
+    comp: "4",
+    req: "Procesos para el manejo de información entrante y respuesta",
+    resp: "Subdirección Administrativa y Financiera",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el procedimiento GD_C-PR-001 formalizado; no obstante, se recomienda asegurar su integración con los canales de atención y comunicación institucional, con el fin de fortalecer la oportunidad y trazabilidad de las respuestas."
+  },
+  {
+    id: "15.4",
+    comp: "4",
+    req: "Evaluación periódica de la efectividad de los canales externos",
+    resp: "Oficina de Relacionamiento con la Ciudadanía",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos que contemplan mecanismos generales; sin embargo, no se evidenció un proceso específico de evaluación periódica de la efectividad de los canales externos, con responsable, periodicidad y evidencia verificables."
+  },
+  {
+    id: "15.5",
+    comp: "4",
+    req: "Análisis periódico de la caracterización de usuarios y grupos de valor",
+    resp: "Oficina Asesora de Planeación",
+    co: "Oficina de Relacionamiento con la Ciudadanía",
+    s24s1: 0,
+    s24s2: 25,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos que incorporan elementos generales; no obstante, no se identificó un control específico con responsable y periodicidad verificables para el análisis periódico de la caracterización de usuarios y grupos de valor."
+  },
+  {
+    id: "15.6",
+    comp: "4",
+    req: "Análisis de resultados de evaluación de percepción de usuarios",
+    resp: "Oficina de Relacionamiento con la Ciudadanía",
+    co: "Oficina Jurídica",
+    s24s1: 0,
+    s24s2: 25,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; no obstante, se mantiene la necesidad de fortalecer la trazabilidad entre los resultados de percepción y las acciones de mejora definidas, de forma que se consolide su seguimiento y verificación."
+  }
+];
+
+const comp5 = [
+  {
+    id: "16.1",
+    comp: "5",
+    req: "Aprobación del Plan Anual de Auditoría por el CICCI",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 50,
+    s24s2: 100,
+    s25s1: 50,
+    s25s2: 75,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados que regulan la formulación, presentación y aprobación del Plan Anual de Auditoría en el marco del Comité Institucional de Coordinación de Control Interno."
+  },
+  {
+    id: "16.2",
+    comp: "5",
+    req: "Evaluación periódica de los resultados de las evaluaciones por la Alta Dirección",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Entidad cuenta con el Procedimiento de Administración del MIPG formalizado; no obstante, se identifican oportunidades de fortalecimiento en la sistematicidad de la evaluación de resultados por parte de la Alta Dirección."
+  },
+  {
+    id: "16.3",
+    comp: "5",
+    req: "Realización de evaluaciones independientes periódicas por la Oficina de Control Interno",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 50,
+    s24s2: 100,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados que regulan la planeación, ejecución y seguimiento de evaluaciones independientes, en concordancia con el rol de la tercera línea de defensa."
+  },
+  {
+    id: "16.4",
+    comp: "5",
+    req: "Procedimientos de monitoreo continuo por parte de la segunda línea de defensa",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Manual de Líneas de Defensa formalizado; no obstante, se identifican oportunidades de mejora en la ejecución verificable y documentada de las actividades de monitoreo continuo."
+  },
+  {
+    id: "16.5",
+    comp: "5",
+    req: "Consideración de evaluaciones externas realizadas por organismos de control u otros entes",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Procedimiento GE_A-PR-005 formalizado; no obstante, no incorpora lineamientos específicos para la consideración sistemática de evaluaciones externas realizadas por organismos de control u otros entes."
+  },
+  {
+    id: "17.1",
+    comp: "5",
+    req: "Evaluación del efecto de las evaluaciones independientes sobre el Sistema de Control Interno",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; sin embargo, no se identificó un mecanismo explícito orientado a evaluar el efecto de las evaluaciones independientes sobre el Sistema de Control Interno."
+  },
+  {
+    id: "17.2",
+    comp: "5",
+    req: "Consolidación de informes externos y conclusión sobre su impacto en el Sistema de Control Interno",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; no obstante, no se identificaron disposiciones específicas para la consolidación de informes externos ni para la emisión de conclusiones integrales sobre su impacto en el Sistema de Control Interno."
+  },
+  {
+    id: "17.3",
+    comp: "5",
+    req: "Políticas que establecen a quién se deben reportar las deficiencias del Sistema de Control Interno",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el Manual de Líneas de Defensa; no obstante, se identifican oportunidades de mejora en la definición de la periodicidad para el reporte de deficiencias del Sistema de Control Interno."
+  },
+  {
+    id: "17.4",
+    comp: "5",
+    req: "Seguimiento a las acciones correctivas frente a deficiencias comunicadas",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; sin embargo, no se identificaron disposiciones que acrediten el seguimiento a las acciones correctivas dentro de plazos definidos y verificables."
+  },
+  {
+    id: "17.5",
+    comp: "5",
+    req: "Evaluación de procesos y servicios tercerizados de acuerdo con su nivel de riesgo",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 0,
+    s24s2: 100,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados que incorporan el análisis de riesgos como criterio para la priorización de procesos y servicios tercerizados objeto de evaluación."
+  },
+  {
+    id: "17.6",
+    comp: "5",
+    req: "Evaluación de la información de usuarios y PQRSD para la mejora del Sistema de Control Interno",
+    resp: "Subdirección Administrativa y Financiera",
+    co: "Oficina de Saberes y Conocimientos Estratégicos / Oficina Jurídica",
+    s24s1: 0,
+    s24s2: 50,
+    s25s1: 25,
+    s25s2: 25,
+    obs: "Se evidenció que la Entidad cuenta con el Procedimiento GD_C-PR-001 formalizado; no obstante, no se identificaron disposiciones orientadas a la evaluación sistemática de la información derivada de PQRSD como insumo para la mejora del Sistema de Control Interno."
+  },
+  {
+    id: "17.7",
+    comp: "5",
+    req: "Verificación del avance de los planes de mejoramiento derivados de autoevaluaciones",
+    resp: "Oficina Asesora de Planeación",
+    co: "",
+    s24s1: 50,
+    s24s2: 50,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados; sin embargo, no se identificaron disposiciones específicas para la verificación periódica del avance de los planes de mejoramiento derivados de procesos de autoevaluación."
+  },
+  {
+    id: "17.8",
+    comp: "5",
+    req: "Evaluación de la efectividad de los planes de mejoramiento derivados de auditorías",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 0,
+    s24s2: 100,
+    s25s1: 50,
+    s25s2: 50,
+    obs: "Se evidenció que la Entidad cuenta con el instructivo ACI_S-IN-001 formalizado; no obstante, no se establecen criterios de periodicidad ni metodologías específicas para la evaluación de la efectividad de los planes de mejoramiento."
+  },
+  {
+    id: "17.9",
+    comp: "5",
+    req: "Reporte de deficiencias del Sistema de Control Interno a responsables de nivel superior",
+    resp: "Oficina de Control Interno",
+    co: "",
+    s24s1: 0,
+    s24s2: 100,
+    s25s1: 50,
+    s25s2: 100,
+    obs: "Se evidenció que la Entidad cuenta con instrumentos formalizados asociados al reporte de deficiencias del Sistema de Control Interno a instancias de nivel superior."
+  }
+];
+
+
+        const meciData = [...comp1, ...comp2, ...comp3, ...comp4, ...comp5];
+/*****************************************************
+ * REPOSITORIO DE DEBILIDADES Y FORTALEZAS POR PERIODO
+ * (Conclusiones DAFP – Evaluación SCI / MECI)
+ *****************************************************/
+
+/*
+ Componentes:
+  1 = Ambiente de Control
+  2 = Evaluación de Riesgos
+  3 = Actividades de Control
+  4 = Información y Comunicación
+  5 = Actividades de Monitoreo
+
+ Semestres:
+  2024S1 | 2024S2 | 2025S1 | 2025S2
+*/
+
+const COMPONENT_INSIGHTS = {
+"1": { // Ambiente de Control
+  "2024S1": {
+    fort:
+      "• La entidad ha constituido formalmente el Comité de Convivencia (Resolución 309 de mayo de 2024) y el Comité Institucional de Coordinación de Control Interno (CICCI) (Resolución 463 de 2024), promoviendo un ambiente de control orientado a la integridad y al fortalecimiento del Sistema de Control Interno.\n" +
+      "• La publicación del Plan Estratégico de Talento Humano y de la matriz de riesgos en la página de transparencia refleja un compromiso inicial con la transparencia, la gestión de riesgos y el desarrollo de competencias del personal, apoyando el ciclo de vida de los servidores públicos.",
+    deb:
+      "• El esquema de líneas de defensa no se ha estructurado ni documentado de acuerdo con el Manual Operativo del Modelo Integrado de Planeación y Gestión.\n" +
+      "• No se ha definido ni implementado la Política de Administración del Riesgo, incluyendo procedimientos para actualizar y monitorear la matriz conforme a cambios del entorno y niveles de aceptación del riesgo.\n" +
+      "• No se han implementado mecanismos de evaluación y seguimiento para la Planeación Estratégica.\n" +
+      "• Inexistencia del Código de Integridad y de un sistema para denunciar irregularidades o incumplimientos; así como ausencia de documentación formal y procedimientos para el manejo de conflictos de interés.\n" +
+      "• Ausencia de políticas que definan responsabilidades individuales de los servidores en el desarrollo y mantenimiento del control interno.\n" +
+      "• Falta de procedimientos relacionados con el ciclo de vida del talento humano.\n" +
+      "• Falta de implementación y seguimiento del plan de capacitación (PIC); aunque el PIC está formalizado, no se cuenta con una metodología para medir su impacto en el desarrollo de competencias.\n" +
+      "• Deficiencias en mecanismos para la prevención del uso inadecuado de información privilegiada.\n" +
+      "• No se evidencian mecanismos de evaluación que permitan monitorear el impacto y la calidad de los productos y servicios proporcionados por los contratistas.\n" +
+      "• No existe un procedimiento formal para analizar los informes de la Oficina de Control Interno y evaluar su impacto en la mejora institucional."
+  },
+
+  "2024S2": {
+    fort:
+      "• Definición del Esquema de Líneas de Defensa, con roles y responsabilidades identificadas para líderes de proceso, planeación transversal y control interno.\n" +
+      "• Establecimiento de bases para construir acciones correctivas y de mejora, orientadas a eliminar causas de no conformidades y fortalecer capacidades institucionales en el marco del MIPG.\n" +
+      "• Avances y aprendizajes en la construcción de informes estratégicos, promoviendo una cultura de rendición de cuentas y aprendizaje organizacional.\n" +
+      "• Inclusión de la metodología para la construcción del mapa de riesgos institucional en la identificación y establecimiento de controles para mitigar riesgos de corrupción.\n" +
+      "• Ejecución de evaluaciones por parte de la tercera línea de defensa para identificar desviaciones y proponer mejoras.",
+    deb:
+      "• No se cuenta con mecanismos para el manejo de conflictos de interés; no existen actividades diseñadas, ni políticas, procedimientos o instructivos que establezcan lineamientos claros para su identificación y gestión.\n" +
+      "• Se identifican oportunidades de mejora en la evaluación de actividades relacionadas con la permanencia del personal; aunque existen actividades, se requiere fortalecer su documentación (procedimientos/instructivos/guías) para estandarizar y asegurar efectividad.\n" +
+      "• El Esquema de Líneas de Defensa está documentado, pero está pendiente de formalización y socialización, y requiere acciones para su implementación.\n" +
+      "• Se evidencian falencias en la evaluación de actividades relacionadas con la permanencia del personal; aunque hay actividades diseñadas, no están completamente documentadas, dificultando su estandarización.\n" +
+      "• La información generada por la segunda y tercera línea de defensa no se utiliza de manera efectiva para decisiones estratégicas; aunque existen actividades diseñadas, no se evidencia su implementación."
+  },
+
+  "2025S1": {
+    fort:
+      "• Fortalecimiento de la cultura ética mediante la elaboración y formalización del Código de Integridad, aprobado en la II Sesión del Comité Institucional de Gestión (22 de mayo de 2025), consolidando un ambiente organizacional basado en valores.\n" +
+      "• Formalización y divulgación de la Guía de Gestión de Conflictos de Interés, con directrices para prevenir, identificar y gestionar posibles conflictos en servidores y contratistas.\n" +
+      "• Aprobación y socialización del Acuerdo de Confidencialidad (abril y mayo de 2025), definiendo parámetros para el manejo de información pública, clasificada y reservada.\n" +
+      "• Formalización y socialización del Manual de Supervisión e Interventoría, estandarizando procesos y responsabilidades en la gestión contractual para favorecer transparencia, eficiencia y cumplimiento.",
+    deb:
+      "• Aunque se formalizó la Guía de Conflictos de Interés y el Código de Integridad, la entidad carece de procedimientos para su aplicación, seguimiento y evaluación, limitando su impacto práctico.\n" +
+      "• A pesar del Acuerdo de Confidencialidad, no se ha definido una política integral ni procedimiento para el manejo de información privilegiada, clasificada o sensible.\n" +
+      "• No se evidencia cómo la línea de denuncia interna retroalimenta la gestión de riesgos o procesos estratégicos, limitando_tf su utilidad preventiva.\n" +
+      "• Ausencia de formalización y socialización de un procedimiento para aplicar la Política de Administración del Riesgo, especialmente en actualización de matriz y niveles de aceptación.\n" +
+      "• Las actividades de ingreso, permanencia y retiro de personal no cuentan con procedimientos formalizados y vigentes, afectando la gestión integral del talento humano.\n" +
+      "• No se ha comunicado la responsabilidad individual a funcionarios y contratistas en el desarrollo y mantenimiento del control interno.\n" +
+      "• La información de la segunda y tercera línea de defensa no se utiliza de manera efectiva en la toma de decisiones estratégicas, pese a existir mecanismos diseñados."
+  },
+
+  "2025S2": {
+    fort:
+      "• Se evidenció el despliegue de la Política de Integridad mediante actividades de divulgación, socialización y apropiación dirigidas a servidores y contratistas, fortaleciendo la cultura ética institucional.\n" +
+      "• Se observó la definición de mecanismos para la gestión de conflictos de interés, soportados en formatos institucionales y acciones preventivas.\n" +
+      "• Se evidenciaron acciones orientadas a la prevención del uso inadecuado de información privilegiada, mediante instrumentos de confidencialidad y lineamientos asociados.\n" +
+      "• Se evidenció el monitoreo de riesgos de corrupción mediante informes comunicados trimestralemte.\n" +
+      "• Se evidenció la operación del Comité Institucional de Gestión y Desempeño y del Comité Institucional de Coordinación de Control Interno.",
+    deb:
+      "• Se identifican aspectos por mejorar frente al seguimiento estratégico a la planeación institucional, en especial el tratamiento de alertas sobre posibles incumplimientos y necesidades de recursos.\n" +
+      "• Si bien existe el Manual de Líneas de Defensa, la evidencia no permite concluir su funcionamiento efectivo (periodicidad, estándares de reporte, responsabilidades operativas y apropiación institucional).\n" +
+      "• Deficiencias en el uso de los productos derivados de la implementación de la línea de denuncia interna, como insumo para la gestión del riesgo o para la mejora institucional.\n" +
+      "• Aunque se evidencian socializaciones de políticas, se requiere fortalecer la comunicación explícita sobre la responsabilidad individual de la primera línea de defensa en el mantenimiento del control interno.\n" +
+      "• Si bien existe el Manual de Gestión del Cambio, no se evidencia de manera suficiente su aplicación sistemática para preservar la estructura de control ante cambios organizacionales.\n" +
+      "• Aunque existe instrumentación para planes de mejoramiento, se requiere fortalecer el análisis institucional sobre el impacto de los informes de control interno en la toma de decisiones y la mejora continua."
+  }
+},
+"2": { // Evaluación de Riesgos
+  "2024S1": {
+    fort:
+      "• La entidad cuenta con ejercicios iniciales de identificación de riesgos institucionales, lo cual evidencia un reconocimiento temprano de la importancia de la administración del riesgo como insumo para la planeación y la toma de decisiones.\n" +
+      "• Se identifican esfuerzos iniciales por documentar riesgos asociados a procesos misionales y de apoyo, constituyéndose en una base para el fortalecimiento progresivo del componente.",
+    deb:
+      "• No se evidenció la existencia de una Política de Administración del Riesgo formalizada y aprobada por la Alta Dirección.\n" +
+      "• La matriz de riesgos no se encuentra actualizada ni alineada con el contexto institucional, ni incorpora de manera integral riesgos de corrupción, operativos, estratégicos y de gestión.\n" +
+      "• No se identifican mecanismos definidos para la aceptación del riesgo por parte de la Alta Dirección.\n" +
+      "• No se evidencia articulación efectiva entre la planeación estratégica, los objetivos operativos y la gestión del riesgo.\n" +
+      "• No se cuenta con lineamientos ni procedimientos para el seguimiento a riesgos materializados ni para la definición de cursos de acción."
+  },
+
+  "2024S2": {
+    fort:
+      "• Se evidencian avances en la documentación de instrumentos asociados a la gestión del riesgo, incluyendo ejercicios de identificación y valoración.\n" +
+      "• Se incorporan elementos de análisis de riesgos de corrupción en instrumentos institucionales, en concordancia con lineamientos del MIPG.\n" +
+      "• Se observan esfuerzos de la segunda línea de defensa por consolidar información para el seguimiento del riesgo.",
+    deb:
+      "• La Política de Administración del Riesgo no se encuentra formalizada ni actualizada conforme al contexto institucional.\n" +
+      "• La información sobre riesgos no se consolida de manera consistente, presentándose diferencias entre matrices, informes y reportes institucionales.\n" +
+      "• No se evidencia un análisis periódico de los riesgos por parte de la Alta Dirección que permita definir acciones estratégicas.\n" +
+      "• No se identifican mecanismos claros para el seguimiento a riesgos aceptados ni para evaluar el impacto de los riesgos materializados.\n" +
+      "• La gestión del riesgo no se encuentra plenamente integrada a la operación de programas, proyectos ni a las instancias territoriales."
+  },
+
+  "2025S1": {
+    fort:
+      "• Formalización de la Política de Administración del Riesgo (GE_A-PO-001), aprobada en diciembre de 2024, constituyéndose en un marco normativo para la gestión del riesgo institucional.\n" +
+      "• Avances en la identificación y valoración de riesgos institucionales, incluyendo riesgos de corrupción.\n" +
+      "• Se evidencian actividades de seguimiento a riesgos materializados, conforme a la información reportada por la entidad.\n" +
+      "• Se observan ejercicios de análisis de información generada por la segunda línea de defensa.",
+    deb:
+      "• La Política de Administración del Riesgo no se encuentra actualizada conforme al contexto institucional y a los cambios organizacionales.\n" +
+      "• Persiste debilidad en la trazabilidad entre los reportes de seguimiento y las acciones definidas frente a riesgos materializados.\n" +
+      "• No se evidencia un uso sistemático de la información de riesgos por parte de la Alta Dirección para la toma de decisiones.\n" +
+      "• La matriz de riesgos no incorpora de manera suficiente riesgos asociados a la operación territorial ni a actividades tercerizadas.\n" +
+      "• No se cuenta con mecanismos consolidados para el monitoreo de riesgos aceptados."
+  },
+
+  "2025S2": {
+    fort:
+      "• Se evidenció la realización de ejercicios de seguimiento a riesgos institucionales y de corrupción, con soportes documentales e informes trimestrales a la ciudadanía.\n" +
+      "• Se identificaron avances en la consolidación de información asociada a la gestión del riesgo, presentada ante instancias institucionales.\n" +
+      "• Se evidenció el seguimiento a riesgos materializados durante la vigencia 2024, conforme a los reportes institucionales.\n" +
+      "• Se evidenció la evaluación de controles, por parte de la tercera línea de defensa.",
+    deb:
+      "• La Política de Administración del Riesgo requiere actualización para mantener su alineación con los lineamientos del Departamento Administrativo de Función Pública.\n" +
+      "• La información de riesgos presentada a la Alta Dirección no se consolida de manera sistemática para orientar decisiones estratégicas.\n" +
+      "• Persisten debilidades en la trazabilidad entre riesgos identificados, acciones definidas y resultados del seguimiento.\n" +
+      "• La matriz de riesgos no incorpora de forma integral riesgos asociados a instancias territoriales.\n" +
+      "• No se evidencia un análisis específico del impacto de cambios organizacionales sobre el Sistema de Control Interno desde la gestión del riesgo."
+  }
+},
+"3": { // Actividades de Control
+  "2024S1": {
+    fort:
+      "• La entidad cuenta con instrumentos iniciales que orientan la segregación de funciones y la estructura de control, particularmente a través del Manual de Líneas de Defensa.\n" +
+      "• Se evidencian actividades de evaluación por parte de la tercera línea de defensa, orientadas a verificar procesos, procedimientos y controles institucionales.\n" +
+      "• Existen lineamientos generales para la gestión del riesgo y la evaluación de controles, constituyendo una base para el fortalecimiento progresivo del componente.",
+    deb:
+      "• No se evidencia una segregación de funciones plenamente definida y aplicada de manera consistente, lo cual incrementa el riesgo de errores o irregularidades.\n" +
+      "• No se identifican mecanismos formales para detectar situaciones en las que no exista segregación de funciones ni para definir cursos de acción.\n" +
+      "• Las actividades de control sobre infraestructuras y proveedores de TI no se encuentran formalizadas ni documentadas de manera integral.\n" +
+      "• No se evidencian matrices de roles y usuarios formalizadas que aseguren la segregación de funciones.\n" +
+      "• No se cuenta con evaluaciones sistemáticas del diseño y la adecuación de los controles frente a la gestión del riesgo."
+  },
+
+  "2024S2": {
+    fort:
+      "• Se evidencian avances en la documentación de instrumentos asociados a las actividades de control, incluyendo evaluaciones realizadas por la tercera línea de defensa.\n" +
+      "• Se observa la aplicación del Procedimiento de Trabajos de Aseguramiento, aportando elementos para verificar la ejecución de controles.\n" +
+      "• Se identifican esfuerzos por integrar la gestión del riesgo y las actividades de control en los procesos evaluados.",
+    deb:
+      "• Persisten debilidades en la segregación de funciones, particularmente en la identificación y tratamiento de situaciones en las que no es posible su aplicación.\n" +
+      "• Los controles asociados a infraestructuras y proveedores de TI no se encuentran plenamente formalizados ni estandarizados.\n" +
+      "• Las matrices de roles y usuarios no se encuentran definidas ni formalizadas, limitando la efectividad de la segregación de funciones.\n" +
+      "• La segunda línea de defensa no realiza evaluaciones sistemáticas del diseño y adecuación de los controles, lo que debilita el ciclo integral de mejora."
+  },
+
+  "2025S1": {
+    fort:
+      "• Se evidencia la aplicación consistente del Procedimiento de Trabajos de Aseguramiento, permitiendo evaluar el diseño y la ejecución de controles en los procesos evaluados.\n" +
+      "• Se observan avances en la verificación de que los responsables ejecutan los controles conforme a su diseño.\n" +
+      "• Se cuenta con evaluaciones independientes que aportan insumos para fortalecer las actividades de control frente a la gestión del riesgo.",
+    deb:
+      "• Persisten debilidades en la segregación de funciones, evidenciadas en materializaciones de riesgo asociadas a su aplicación.\n" +
+      "• Las actividades de control sobre proveedores y servicios de TI no se encuentran plenamente formalizadas, limitando la estandarización y seguimiento.\n" +
+      "• Las matrices de roles y usuarios continúan siendo un aspecto por fortalecer en términos de definición, formalización y aplicación.\n" +
+      "• No se evidencia una evaluación sistemática por parte de la segunda línea de defensa sobre la actualización y adecuación de procesos, procedimientos y políticas."
+  },
+
+  "2025S2": {
+    fort:
+      "• Se evidenció la aplicación del Procedimiento de Trabajos de Aseguramiento, permitiendo verificar la ejecución de controles conforme a su diseño.\n" +
+      "• Se observaron evaluaciones del diseño de controles frente a la gestión del riesgo, aportando elementos para la mejora de los procesos evaluados.\n" +
+      "• Se evidenció la priorización de evaluaciones con enfoque basado en riesgos, fortaleciendo la efectividad de las actividades de control.",
+    deb:
+      "• Persisten oportunidades de mejora en la segregación de funciones.\n" +
+      "• Las actividades de control sobre infraestructuras y proveedores de TI requieren fortalecimiento en su formalización y seguimiento.\n" +
+      "• La Política de Administración del Riesgo y las matrices de riesgo se encuentra pendiente de actualzación en concordancia con los Lineamientos del Departamento Administrativo de la Función Pública.\n" +
+      "• No se evidencia una evaluación por parte de la segunda línea de defensa que consolide un ciclo integral de mejora de los controles."
+  }
+},
+"4": { // Información y Comunicación
+  "2024S1": {
+    fort:
+      "• La entidad cuenta con instrumentos iniciales para la gestión de la información, orientados a capturar, procesar y publicar datos relevantes, en concordancia con los principios de transparencia.\n" +
+      "• Se evidencian canales definidos para la comunicación interna y externa, así como procedimientos generales para la atención de información entrante.\n" +
+      "• Se identifican esfuerzos iniciales para documentar fuentes de información internas y externas.",
+    deb:
+      "• Los sistemas de información y documentos técnicos asociados se encuentran en estado de borrador, lo cual limita su adopción formal y la trazabilidad institucional.\n" +
+      "• No se cuenta con un inventario de información relevante con mecanismos claros y periódicos de actualización.\n" +
+      "• No se evidencian controles específicos sobre integridad, confidencialidad y disponibilidad de la información.\n" +
+      "• La comunicación de objetivos y metas por parte de la Alta Dirección no se despliega de manera sistemática ni verificable.\n" +
+      "• No se identifican mecanismos formales para evaluar la efectividad de los canales de comunicación interna y externa."
+  },
+
+  "2024S2": {
+    fort:
+      "• Se evidencian avances en la documentación de instrumentos asociados a la gestión de la información y la comunicación institucional.\n" +
+      "• Se observan esfuerzos por definir fuentes de datos internas y externas, así como responsables para su gestión.\n" +
+      "• Se cuenta con procedimientos formalizados para el manejo de información entrante y respuesta.",
+    deb:
+      "• Persisten documentos técnicos en estado de borrador, particularmente aquellos asociados al Registro de Igualdad y Equidad (RIE).\n" +
+      "• No se evidencia un inventario consolidado y actualizado de información relevante con responsables y periodicidad definida.\n" +
+      "• Se identifican vacíos en la definición y aplicación de controles sobre integridad, confidencialidad y disponibilidad de la información.\n" +
+      "• No se cuenta con un procedimiento formal para evaluar periódicamente la efectividad de los canales externos de comunicación.\n" +
+      "• La caracterización de usuarios y grupos de valor no cuenta con un control específico y verificable para su análisis periódico."
+  },
+
+  "2025S1": {
+    fort:
+      "• Se evidenció la formalización de la Política de Gestión Estadística Institucional, estableciendo lineamientos para el manejo de la información.\n" +
+      "• Se cuenta con procedimientos formalizados para la gestión de información entrante y la atención de solicitudes ciudadanas.\n" +
+      "• Se observan avances en la definición de canales de comunicación interna y externa, así como en la publicación de información institucional.\n" +
+      "• Se identifican ejercicios de análisis de resultados de percepción de usuarios.",
+    deb:
+      "• Los documentos técnicos asociados a la Política de Gestión Estadística continúan en estado de borrador, lo que limita su implementación efectiva.\n" +
+      "• No se evidencia una definición clara y verificable de niveles de autoridad y responsabilidad en la administración de la información.\n" +
+      "• No se identifican controles formales para evaluar periódicamente la efectividad de los canales externos.\n" +
+      "• La trazabilidad entre los resultados de percepción de usuarios y las acciones de mejora definidas no es suficiente.\n" +
+      "• No se cuenta con un procedimiento específico para el análisis periódico de la caracterización de usuarios y grupos de valor."
+  },
+
+  "2025S2": {
+    fort:
+      "• Se evidenció la existencia de instrumentos formalizados para la gestión de la información y la comunicación institucional, tales como la Política de Gestión Estadística Institucional, los procedimientos para la atención de información entrante y la operación de canales institucionales de comunicación interna y externa.\n" +
+      "• Se evidenció avance en la Estructuración Plan Estratégico de Comunicaciones.\n" +
+      "• Se evidenció la operación de canales de comunicación interna y externa, así como procedimientos para la atención de información entrante.\n" +
+      "• Se evidenció el análisis de percepción de usuarios, con información publicada.",
+    deb:
+      "• Los documentos técnicos asociados al Registro de Igualdad y Equidad (RIE) continúan en estado de borrador.\n" +
+      "• No se evidencia un inventario institucional de información relevante con responsables y periodicidad definida.\n" +
+      "• Persisten oportunidades de mejora en la definición y aplicación de controles sobre integridad, confidencialidad y disponibilidad de la información.\n" +
+      "• No se cuenta con un mecanismo formal para evaluar la efectividad de los canales externos de comunicación.\n" +
+      "• La articulación entre resultados de percepción de usuarios, PQRSD y acciones de mejora institucional requiere fortalecimiento."
+  }
+},
+"5": { // Actividades de Monitoreo
+  "2024S1": {
+    fort:
+      "• La entidad cuenta con la Oficina de Control Interno y con instancias institucionales que permiten adelantar evaluaciones independientes sobre procesos y actividades.\n" +
+      "• Se evidencian ejercicios iniciales de seguimiento a planes de mejoramiento y a resultados de evaluaciones, constituyéndose en un punto de partida para el fortalecimiento del monitoreo institucional.",
+    deb:
+      "• No se evidencian procedimientos formalizados que regulen de manera integral el monitoreo continuo por parte de la segunda línea de defensa.\n" +
+      "• No se identifican mecanismos definidos para evaluar el efecto de las evaluaciones independientes sobre el Sistema de Control Interno.\n" +
+      "• No se cuenta con lineamientos claros para la consolidación y análisis de informes externos de organismos de control.\n" +
+      "• No se evidencia seguimiento sistemático a las acciones correctivas derivadas de deficiencias comunicadas.\n" +
+      "• No se identifican mecanismos para evaluar la efectividad de los planes de mejoramiento."
+  },
+
+  "2024S2": {
+    fort:
+      "• Se evidenció la aprobación y operación del Comité Institucional de Coordinación de Control Interno (CICCI), como instancia para el seguimiento y articulación del Sistema de Control Interno.\n" +
+      "• Se observan ejercicios de evaluación independiente realizados por la Oficina de Control Interno.\n" +
+      "• Se identifican avances en el seguimiento a planes de mejoramiento derivados de auditorías.",
+    deb:
+      "• No se cuenta con procedimientos formalizados y documentados para el monitoreo continuo por parte de la segunda línea de defensa.\n" +
+      "• No se evidencian mecanismos explícitos para evaluar el impacto de las evaluaciones independientes en la mejora del Sistema de Control Interno.\n" +
+      "• La consolidación de informes externos y la emisión de conclusiones integrales sobre su impacto no se encuentran reglamentadas.\n" +
+      "• El seguimiento a las acciones correctivas no se realiza dentro de plazos definidos y verificables.\n" +
+      "• No se cuenta con criterios claros para evaluar la efectividad de los planes de mejoramiento."
+  },
+
+  "2025S1": {
+    fort:
+      "• Se evidenció la aprobación y seguimiento del Plan Anual de Auditoría por parte del CICCI, en concordancia con el rol de la Oficina de Control Interno.\n" +
+      "• Se observaron evaluaciones independientes periódicas realizadas por la Oficina de Control Interno, aportando insumos objetivos para la mejora institucional.\n" +
+      "• Se identifican avances en el seguimiento a planes de mejoramiento derivados de auditorías y autoevaluaciones.\n" +
+      "• Se evidencian reportes de deficiencias del Sistema de Control Interno a instancias de nivel superior.",
+    deb:
+      "• Aunque existen instrumentos formalizados, no se evidencia un mecanismo explícito para evaluar el efecto de las evaluaciones independientes sobre el Sistema de Control Interno.\n" +
+      "• No se cuenta con disposiciones específicas para la consolidación de informes externos y la emisión de conclusiones integrales sobre su impacto.\n" +
+      "• El seguimiento a las acciones correctivas frente a deficiencias comunicadas no se encuentra documentado con periodicidad y responsables definidos.\n" +
+      "• No se establecen criterios claros para evaluar la efectividad de los planes de mejoramiento.\n" +
+      "• La información derivada de PQRSD no se utiliza de manera sistemática como insumo para la mejora del Sistema de Control Interno."
+  },
+
+  "2025S2": {
+    fort:
+      "• Se evidenció la aprobación, ejecución y seguimiento del Plan Anual de Auditoría en el marco del CICCI, con soportes documentales.\n" +
+      "• Se constató la realización de evaluaciones independientes periódicas por parte de la Oficina de Control Interno, en concordancia con el rol de la tercera línea de defensa.\n" +
+      "• Se evidenció el reporte de deficiencias del Sistema de Control Interno a instancias de nivel superior.\n" +
+      "• Se observaron avances en el seguimiento a planes de mejoramiento derivados de auditorías y evaluaciones.\n" +
+      "• Se identificó la priorización de procesos y servicios tercerizados para evaluación, con enfoque basado en riesgos.",
+    deb:
+      "• No se evidenció un mecanismo sistemático para evaluar el impacto de las evaluaciones independientes sobre el Sistema de Control Interno.\n" +
+      "• No se cuenta con disposiciones específicas para la consolidación de informes externos y la formulación de conclusiones integrales sobre su impacto institucional.\n" +
+      "• El seguimiento a las acciones correctivas por parte de la segunda línea de defensa, requiere fortalecimiento en términos de plazos, responsables y evidencia verificable.\n" +
+      "• No se evidenciaron criterios metodológicos definidos para evaluar la efectividad de los planes de mejoramiento.\n" +
+      "• La información proveniente de PQRSD y usuarios no se utiliza de manera sistemática como insumo para la mejora continua del Sistema de Control Interno."
+  }
+},
+
+};
+
+/**
+ * Retorna la debilidad o fortaleza según:
+ * - componente
+ * - semestre activo
+ * - tipo ('deb' | 'fort')
+ */
+function getInsight(compId, semester, type) {
+  const v = COMPONENT_INSIGHTS?.[String(compId)]?.[String(semester)]?.[type];
+  return (v && v.trim()) ? v.trim() : "—";
+}
+
+        let currentSemester = '2025S2';
+        let currentComp = 'all';
+        let currentFilter = 'all';
+        let currentView = 'cards';
+        let chartB, chartP, modalChart;
+
+    
+
+        const MECI_COLORS = {
+            mayor: getComputedStyle(document.documentElement).getPropertyValue('--meci-mayor').trim(),
+            deficiencia: getComputedStyle(document.documentElement).getPropertyValue('--meci-deficiencia').trim(),
+            oportunidad: getComputedStyle(document.documentElement).getPropertyValue('--meci-oportunidad').trim(),
+            mantenimiento: getComputedStyle(document.documentElement).getPropertyValue('--meci-mantenimiento').trim()
+        };
+
+        function getSemesterValue(item, semester) {
+            if (semester === '2024S1') return item.s24s1;
+            if (semester === '2024S2') return item.s24s2;
+            if (semester === '2025S1') return item.s25s1;
+            if (semester === '2025S2') return item.s25s2;
+            return item.s25s2;
+        }
+
+        function getColorForValue(val) {
+            if (val <= 25) return MECI_COLORS.mayor;
+            if (val <= 50) return MECI_COLORS.deficiencia;
+            if (val <= 75) return MECI_COLORS.oportunidad;
+            return MECI_COLORS.mantenimiento;
+        }
+
+        function getStatusClass(val) {
+            if (val <= 25) return 'mayor';
+            if (val <= 50) return 'deficiencia';
+            if (val <= 75) return 'oportunidad';
+            return 'mantenimiento';
+        }
+        function openInsightModal(compId, compName) {
+  // Título
+  document.getElementById('insightTitle').innerText = compName;
+
+  // Semestre (bonito)
+  const semLabelMap = { '2024S1':'2024 S1', '2024S2':'2024 S2', '2025S1':'2025 S1', '2025S2':'2025 S2' };
+  document.getElementById('insightSem').innerText = semLabelMap[currentSemester] || currentSemester;
+
+  // Texto desde repositorio
+  document.getElementById('insightFort').innerText = getInsight(compId, currentSemester, 'fort');
+  document.getElementById('insightDeb').innerText  = getInsight(compId, currentSemester, 'deb');
+
+  // Mostrar modal
+  document.getElementById('insightModal').classList.add('active');
+}
+
+function closeInsightModal(event) {
+  if (!event || event.target.id === 'insightModal') {
+    document.getElementById('insightModal').classList.remove('active');
+  }
+}
+
+// Cerrar con ESC (sin tocar tu modal existente)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'Escape') {
+    document.getElementById('insightModal')?.classList.remove('active');
+  }
+});
+
+
+        function getStatusLabel(val) {
+            if (val <= 25) return 'Deficiencia Mayor';
+            if (val <= 50) return 'Deficiencia';
+            if (val <= 75) return 'Oportunidad';
+            return 'Mantenimiento';
+        }
+
+        function getTrend(current, previous) {
+            if (current > previous) return '<i class="fas fa-arrow-up trend-up"></i>';
+            if (current < previous) return '<i class="fas fa-arrow-down trend-down"></i>';
+            return '<i class="fas fa-minus trend-neutral"></i>';
+        }
+
+        function getTrendText(current, previous) {
+            const diff = current - previous;
+            if (diff > 0) return `+${diff}%`;
+            if (diff < 0) return `${diff}%`;
+            return '0%';
+        }
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+            
+            if (tab === 'general') {
+                document.querySelectorAll('.tab-btn')[0].classList.add('active');
+                document.getElementById('tab-general').classList.add('active');
+                updateGeneralView();
+            } else {
+                document.querySelectorAll('.tab-btn')[1].classList.add('active');
+                document.getElementById('tab-detalle').classList.add('active');
+                renderDetailView();
+            }
+        }
+
+        function setSemester(sem) {
+            currentSemester = sem;
+            document.querySelectorAll('.sem-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if(btn.dataset.sem === sem) btn.classList.add('active');
+            });
+            
+            if (document.getElementById('tab-general').classList.contains('active')) {
+                updateGeneralView();
+            } else {
+                renderDetailView();
+            }
+        }
+
+        function filterByComponent(comp) {
+            currentComp = comp;
+            
+            document.querySelectorAll('.comp-box').forEach(b => b.classList.remove('active'));
+            document.querySelectorAll('.comp-btn').forEach(b => b.classList.remove('active'));
+            
+            if (comp === 'all') {
+                document.querySelectorAll('.comp-box')[0].classList.add('active');
+                document.querySelectorAll('.comp-btn')[0].classList.add('active');
+            } else {
+                document.querySelectorAll('.comp-box')[parseInt(comp)].classList.add('active');
+                document.querySelectorAll('.comp-btn')[parseInt(comp)].classList.add('active');
+            }
+            
+            if (document.getElementById('tab-general').classList.contains('active')) {
+                updateGeneralView();
+            } else {
+                renderDetailView();
+            }
+        }
+
+        function updateGeneralView() {
+            const filtered = currentComp === 'all' ? meciData : meciData.filter(d => d.comp === currentComp);
+            const values = filtered.map(d => getSemesterValue(d, currentSemester));
+            const avg = Math.round(values.reduce((a, b) => a + b, 0) / values.length);
+            
+            document.getElementById('kpi-avg').innerText = avg + '%';
+            document.getElementById('side-avg').innerText = avg + '%';
+            
+            let mayorCount = 0, deficienciaCount = 0, oportunidadCount = 0, mantenimientoCount = 0;
+            values.forEach(val => {
+                if (val <= 25) mayorCount++;
+                else if (val <= 50) deficienciaCount++;
+                else if (val <= 75) oportunidadCount++;
+                else mantenimientoCount++;
+            });
+            
+            document.getElementById('kpi-mayor').innerText = mayorCount;
+            document.getElementById('kpi-deficiencia').innerText = deficienciaCount;
+            document.getElementById('kpi-oportunidad').innerText = oportunidadCount;
+            document.getElementById('kpi-mantenimiento').innerText = mantenimientoCount;
+
+            const prevSemMap = {'2024S1': null, '2024S2': '2024S1', '2025S1': '2024S2', '2025S2': '2025S1'};
+            const prevSem = prevSemMap[currentSemester];
+            
+            if (prevSem) {
+                const prevValues = filtered.map(d => getSemesterValue(d, prevSem));
+                const prevAvg = Math.round(prevValues.reduce((a, b) => a + b, 0) / prevValues.length);
+                const trendHtml = getTrend(avg, prevAvg) + ' <span style="color:#666; font-weight:400">' + getTrendText(avg, prevAvg) + '</span>';
+                document.getElementById('side-trend').innerHTML = trendHtml + `<div style="font-size:0.7rem; margin-top:4px; font-weight:400; color:#888">vs semestre anterior (${prevAvg}%)</div>`;
+            } else {
+                document.getElementById('side-trend').innerHTML = '<span style="color:#888; font-size:0.9rem">Período base</span>';
+            }
+
+            updateCharts(filtered);
+            renderSummaryTable(filtered);
+        }
+
+        function renderSummaryTable(data) {
+            const tbody = document.getElementById('summaryTableBody');
+            tbody.innerHTML = '';
+            
+            const components = [
+                {id: '1', name: 'Ambiente de Control', icon: 'shield-alt'},
+                {id: '2', name: 'Evaluación de Riesgos', icon: 'exclamation-triangle'},
+                {id: '3', name: 'Actividades de Control', icon: 'cogs'},
+                {id: '4', name: 'Información y Comunicación', icon: 'comments'},
+                {id: '5', name: 'Monitoreo', icon: 'chart-line'}
+            ];
+
+            const prevSemMap = {'2024S1': null, '2024S2': '2024S1', '2025S1': '2024S2', '2025S2': '2025S1'};
+            const prevSem = prevSemMap[currentSemester];
+
+            components.forEach(comp => {
+                const compData = data.filter(d => d.comp === comp.id);
+                if (currentComp !== 'all' && currentComp !== comp.id) return;
+                
+                const values = compData.map(d => getSemesterValue(d, currentSemester));
+                const avg = values.length ? Math.round(values.reduce((a, b) => a + b, 0) / values.length) : 0;
+                
+                // Calcular debilidades (valores <=50) y fortalezas (valores >50)
+                let debilidades = 0;
+                let fortalezas = 0;
+                values.forEach(val => {
+                    if (val <= 50) debilidades++; else fortalezas++;
+                });
+
+                let trend = '';
+                if (prevSem) {
+                    const prevValues = compData.map(d => getSemesterValue(d, prevSem));
+                    const prevAvg = prevValues.length ? Math.round(prevValues.reduce((a, b) => a + b, 0) / prevValues.length) : 0;
+                    trend = getTrend(avg, prevAvg) + ' ' + getTrendText(avg, prevAvg);
+                }
+
+                const color = getColorForValue(avg);
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+  <i class="fas fa-${comp.icon}" style="color: var(--institucional); margin-right: 8px;"></i>
+  <span class="component-link" onclick="openInsightModal('${comp.id}', '${comp.name}')">
+    ${comp.name}
+  </span>
+</td>
+
+                    <td>${compData.length}</td>
+                    <td style="font-weight: 800; color: ${color}">${avg}%</td>
+                    <td style="font-weight: 600; color: var(--meci-mayor)">${debilidades}</td>
+                    <td style="font-weight: 600; color: var(--meci-mantenimiento)">${fortalezas}</td>
+                    <td>${trend}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateCharts(data) {
+            if(chartB) chartB.destroy();
+            if(chartP) chartP.destroy();
+
+            const ctxB = document.getElementById('barChart').getContext('2d');
+            const isAll = currentComp === 'all';
+            // Mostrar u ocultar la gráfica de barras según se esté visualizando todos los requerimientos
+            const barCard = document.getElementById('barChartCard');
+            if (barCard) {
+                barCard.style.display = isAll ? 'block' : 'none';
+            }
+            const labels = isAll ? 
+                ['Ambiente', 'Riesgos', 'Control', 'Información', 'Monitoreo'] : 
+                data.map(d => d.id);
+
+            const getBarColors = (sem) => {
+                if(isAll) {
+                    return ['1','2','3','4','5'].map(c => {
+                        const items = meciData.filter(d => d.comp === c);
+                        const vals = items.map(i => getSemesterValue(i, sem));
+                        const avgVal = Math.round(vals.reduce((a,b)=>a+b,0)/items.length);
+                        return getColorForValue(avgVal);
+                    });
+                } else {
+                    return data.map(d => getColorForValue(getSemesterValue(d, sem)));
+                }
+            };
+
+            chartB = new Chart(ctxB, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [
+                        { label: '2024 S1', data: isAll ? ['1','2','3','4','5'].map(c => {
+                            const items = meciData.filter(d => d.comp === c);
+                            const vals = items.map(i => i.s24s1);
+                            return Math.round(vals.reduce((a,b)=>a+b,0)/items.length);
+                        }) : data.map(d => d.s24s1), backgroundColor: getBarColors('2024S1'), borderRadius: 4 },
+                        { label: '2024 S2', data: isAll ? ['1','2','3','4','5'].map(c => {
+                            const items = meciData.filter(d => d.comp === c);
+                            const vals = items.map(i => i.s24s2);
+                            return Math.round(vals.reduce((a,b)=>a+b,0)/items.length);
+                        }) : data.map(d => d.s24s2), backgroundColor: getBarColors('2024S2'), borderRadius: 4 },
+                        { label: '2025 S1', data: isAll ? ['1','2','3','4','5'].map(c => {
+                            const items = meciData.filter(d => d.comp === c);
+                            const vals = items.map(i => i.s25s1);
+                            return Math.round(vals.reduce((a,b)=>a+b,0)/items.length);
+                        }) : data.map(d => d.s25s1), backgroundColor: getBarColors('2025S1'), borderRadius: 4 },
+                        { label: '2025 S2', data: isAll ? ['1','2','3','4','5'].map(c => {
+                            const items = meciData.filter(d => d.comp === c);
+                            const vals = items.map(i => i.s25s2);
+                            return Math.round(vals.reduce((a,b)=>a+b,0)/items.length);
+                        }) : data.map(d => d.s25s2), backgroundColor: getBarColors('2025S2'), borderRadius: 4 }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { position: 'bottom', labels: {usePointStyle: true, font: {size: 11}} } },
+                    scales: { y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' } }, x: { grid: { display: false } } }
+                }
+            });
+
+            const ctxP = document.getElementById('pieChart').getContext('2d');
+            const currentValues = data.map(d => getSemesterValue(d, currentSemester));
+            const pieData = [
+                currentValues.filter(v => v <= 25).length,
+                currentValues.filter(v => v > 25 && v <= 50).length,
+                currentValues.filter(v => v > 50 && v <= 75).length,
+                currentValues.filter(v => v > 75).length
+            ];
+
+            chartP = new Chart(ctxP, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Def. Mayor (0-25%)', 'Deficiencia (26-50%)', 'Oportunidad (51-75%)', 'Mantenimiento (76-100%)'],
+                    datasets: [{ 
+                        data: pieData, 
+                        backgroundColor: [MECI_COLORS.mayor, MECI_COLORS.deficiencia, MECI_COLORS.oportunidad, MECI_COLORS.mantenimiento],
+                        borderWidth: 2,
+                        borderColor: '#ffffff',
+                        hoverOffset: 4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    cutout: '60%',
+                    plugins: { 
+                        legend: { position: 'right', labels: { boxWidth: 12, font: { size: 11 }, color: '#444' } } 
+                    }
+                }
+            });
+        }
+
+        function renderDetailView() {
+            let filtered = currentComp === 'all' ? meciData : meciData.filter(d => d.comp === currentComp);
+            
+            if (currentFilter !== 'all') {
+                filtered = filtered.filter(d => {
+                    const val = getSemesterValue(d, currentSemester);
+                    return getStatusClass(val) === currentFilter;
+                });
+            }
+
+            // La búsqueda por ID, descripción o responsable ha sido eliminada para simplificar la vista.
+
+            const prevSemMap = {'2024S1': null, '2024S2': '2024S1', '2025S1': '2024S2', '2025S2': '2025S1'};
+            const prevSem = prevSemMap[currentSemester];
+
+            const cardsContainer = document.getElementById('cardsContainer');
+            const listContainer = document.getElementById('listContainer');
+            const listBody = document.getElementById('listTableBody');
+            
+            cardsContainer.innerHTML = '';
+            listBody.innerHTML = '';
+
+            filtered.forEach(item => {
+                const currentVal = getSemesterValue(item, currentSemester);
+                const prevVal = prevSem ? getSemesterValue(item, prevSem) : currentVal;
+                const statusClass = getStatusClass(currentVal);
+                const statusLabel = getStatusLabel(currentVal);
+                const color = getColorForValue(currentVal);
+
+                // Card View
+                const card = document.createElement('div');
+                card.className = `req-card ${statusClass}`;
+                card.onclick = () => openModal(item);
+                /*
+                 * Estructura de tarjeta inspirada en las categorías 3-5:
+                 * - Fila superior: identificador y porcentaje de cumplimiento
+                 * - Fila intermedia: descripción del requerimiento (múltiples líneas permitidas)
+                 * - Fila inferior: estado (con badge) y tendencia
+                 */
+                card.innerHTML = `
+                    <div class="req-header" style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <span class="req-id">${item.id}</span>
+                        <span class="req-percentage" style="color:${color}; font-weight:800; font-size:1.4rem;">${currentVal}%</span>
+                    </div>
+                    <div class="req-title">${item.req}</div>
+                    <div class="req-meta" style="display:flex; justify-content: space-between; align-items:center; margin-top:12px; font-size:0.8rem;">
+                        <span class="req-status-badge" style="background:${color}20; color:${color}; border:1px solid ${color}40; padding:4px 10px; border-radius:6px; font-weight:700; display:inline-flex; align-items:center; gap:4px;">
+                            <i class="fas fa-circle" style="font-size: 0.6rem;"></i> ${statusLabel}
+                        </span>
+                        <span style="font-size: 0.75rem; color: var(--gray-600); white-space: nowrap;">
+                            ${getTrend(currentVal, prevVal)} ${getTrendText(currentVal, prevVal)}
+                        </span>
+                    </div>
+                `;
+                cardsContainer.appendChild(card);
+
+                // List View
+                const tr = document.createElement('tr');
+                tr.onclick = () => openModal(item);
+                tr.innerHTML = `
+                    <td style="font-weight: 700; color: var(--institucional);">${item.id}</td>
+                    <td style="font-weight: 600; color: var(--gray-800);">${item.req}</td>
+                    <td><div class="compact-text">${item.obs}</div></td>
+                    <td><span class="badge st-${statusClass}">${statusLabel}</span></td>
+                    <td style="font-weight: 800; color: ${color};">${currentVal}%</td>
+                    <td>${getTrend(currentVal, prevVal)} ${getTrendText(currentVal, prevVal)}</td>
+                `;
+                listBody.appendChild(tr);
+            });
+
+            if (currentView === 'cards') {
+                cardsContainer.style.display = 'grid';
+                listContainer.style.display = 'none';
+            } else {
+                cardsContainer.style.display = 'none';
+                listContainer.style.display = 'block';
+            }
+        }
+
+        function toggleView(view) {
+            currentView = view;
+            document.querySelectorAll('.view-toggle button').forEach(b => b.classList.remove('active'));
+            event.target.closest('button').classList.add('active');
+            renderDetailView();
+        }
+
+        function filterByStatus(status) {
+            currentFilter = status;
+            document.querySelectorAll('.filter-badge').forEach(b => b.classList.remove('active'));
+            event.target.classList.add('active');
+            renderDetailView();
+        }
+
+        function filterRequirements() {
+            renderDetailView();
+        }
+
+        function openModal(item) {
+            const currentVal = getSemesterValue(item, currentSemester);
+            const statusClass = getStatusClass(currentVal);
+            
+            document.getElementById('modalTitle').innerText = item.req;
+            document.getElementById('modalId').innerText = `Componente ${item.comp} • ${item.id}`;
+            
+            const statusBadge = document.getElementById('modalStatus');
+            statusBadge.className = `badge st-${statusClass}`;
+            statusBadge.innerText = getStatusLabel(currentVal);
+            
+            document.getElementById('modalResp').innerText = item.resp;
+            
+            const coSection = document.getElementById('modalCoSection');
+            if (item.co) {
+                coSection.style.display = 'block';
+                document.getElementById('modalCo').innerText = item.co;
+            } else {
+                coSection.style.display = 'none';
+            }
+            
+            document.getElementById('modalObs').innerText = item.obs;
+            
+            document.getElementById('detailModal').classList.add('active');
+            
+            // Modal chart
+            if (modalChart) modalChart.destroy();
+            const ctx = document.getElementById('modalChart').getContext('2d');
+            modalChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: ['2024 S1', '2024 S2', '2025 S1', '2025 S2'],
+                    datasets: [{
+                        label: 'Cumplimiento %',
+                        data: [item.s24s1, item.s24s2, item.s25s1, item.s25s2],
+                        borderColor: getColorForValue(currentVal),
+                        backgroundColor: getColorForValue(currentVal) + '33',
+                        borderWidth: 3,
+                        fill: true,
+                        tension: 0.4,
+                        pointRadius: 6,
+                        pointBackgroundColor: '#fff',
+                        pointBorderWidth: 3
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false } },
+                    scales: {
+                        y: { beginAtZero: true, max: 100, grid: { color: '#f1f5f9' } },
+                        x: { grid: { display: false } }
+                    }
+                }
+            });
+        }
+
+        function closeModal(event) {
+            if (!event || event.target.id === 'detailModal') {
+                document.getElementById('detailModal').classList.remove('active');
+            }
+        }
+
+        // Inicialización
+        updateGeneralView();
+    </script>
+</body>
+</html>
